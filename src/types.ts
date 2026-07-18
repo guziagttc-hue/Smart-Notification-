@@ -12,5 +12,13 @@ export interface Task {
   title: string;
   completed: boolean;
   category: string;
-  dueDate: string;
+  date: string;
+  time: string;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  icon: 'calendar' | 'user' | 'cart' | 'briefcase' | 'phone';
+  count: number;
 }

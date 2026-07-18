@@ -3,29 +3,60 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { QuickAdd } from './components/QuickAdd';
 import { ReminderCard } from './components/ReminderCard';
 import { BottomNav } from './components/BottomNav';
 import { NewEventModal } from './components/NewEventModal';
 import { TaskList } from './components/TaskList';
+import { CategoryList } from './components/CategoryList';
+import { SettingsList } from './components/SettingsList';
 import { CalendarDays, ListChecks, Phone, Plus } from 'lucide-react';
-import { Reminder, Task } from './types';
+import { Reminder, Task, Category } from './types';
+import { useNotification } from './hooks/useNotification';
 
 export default function App() {
+  const { sendNotification } = useNotification();
   const [reminders, setReminders] = useState<Reminder[]>([
     { id: '1', title: "ডাক্তারের সাথে অ্যাপয়েন্টমেন্ট", subtitle: "Dr. Karim", date: "2026-12-21", time: "10:30", icon: 'meeting' },
     { id: '2', title: "প্রজেক্ট প্রস্তাবনা জমা", subtitle: "Project Alpha", date: "2026-12-23", time: "16:00", icon: 'task' },
     { id: '3', title: "মুদির বাজার", subtitle: "Rice, Fish", date: "2026-12-24", time: "18:00", icon: 'call' },
   ]);
   const [tasks, setTasks] = useState<Task[]>([
-    { id: '1', title: "অফিস মিটিংয়ের জন্য স্লাইড তৈরি করা", completed: false, category: 'মিটিং', dueDate: 'আজ, বিকাল ৪:০০ টা' },
-    { id: '2', title: "ডাক্তার অ্যাপয়েন্টমেন্টের বুকিং নিশ্চিত করা", completed: false, category: 'গুরুত্বপূর্ণ', dueDate: 'আজ, সকাল ১০:৩০ টা' },
+    { id: '1', title: "অফিস মিটিংয়ের জন্য স্লাইড তৈরি করা", completed: false, category: 'মিটিং', date: '2026-12-21', time: '16:00' },
+    { id: '2', title: "ডাক্তার অ্যাপয়েন্টমেন্টের বুকিং নিশ্চিত করা", completed: false, category: 'গুরুত্বপূর্ণ', date: '2026-12-22', time: '10:30' },
+  ]);
+  const [categories, setCategories] = useState<Category[]>([
+    { id: '1', name: 'মিটিং', icon: 'calendar', count: 5 },
+    { id: '2', name: 'ব্যক্তিগত', icon: 'user', count: 8 },
+    { id: '3', name: 'বাজার', icon: 'cart', count: 3 },
+    { id: '4', name: 'অফিস', icon: 'briefcase', count: 12 },
+    { id: '5', name: 'কল লিস্ট', icon: 'phone', count: 4 },
   ]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reminderToEdit, setReminderToEdit] = useState<Reminder | null>(null);
   const [activeTab, setActiveTab] = useState<'reminders' | 'tasks' | 'categories' | 'settings'>('reminders');
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      const currentDate = now.toISOString().split('T')[0];
+      const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+
+      reminders.forEach(r => {
+        if (r.date === currentDate && r.time === currentTime) {
+          sendNotification('রিমাইন্ডার!', r.title);
+        }
+      });
+      tasks.forEach(t => {
+        if (!t.completed && t.date === currentDate && t.time === currentTime) {
+          sendNotification('কাজ!', t.title);
+        }
+      });
+    }, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [reminders, tasks, sendNotification]);
 
   const addReminder = (reminder: { title: string; subtitle: string; date: string; time: string; icon: 'meeting' | 'task' | 'call' }) => {
     const newReminder: Reminder = {
@@ -104,6 +135,19 @@ export default function App() {
              <div>
                 <h2 className="text-lg font-bold text-gray-800 mb-3 font-bengali">কাজসমূহ</h2>
                 <TaskList tasks={tasks} onToggle={toggleTask} />
+             </div>
+          )}
+
+          {activeTab === 'categories' && (
+             <div>
+                <h2 className="text-lg font-bold text-gray-800 mb-3 font-bengali">ক্যাটাগরি সমূহ</h2>
+                <CategoryList categories={categories} />
+             </div>
+          )}
+          
+          {activeTab === 'settings' && (
+             <div>
+                <SettingsList />
              </div>
           )}
         </div>
