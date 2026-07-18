@@ -8,47 +8,63 @@ import { Header } from './components/Header';
 import { QuickAdd } from './components/QuickAdd';
 import { ReminderCard } from './components/ReminderCard';
 import { BottomNav } from './components/BottomNav';
-import { Stethoscope, FileText, ShoppingCart, Plus } from 'lucide-react';
-import { Reminder } from './types';
+import { NewEventModal } from './components/NewEventModal';
+import { TaskList } from './components/TaskList';
+import { CalendarDays, ListChecks, Phone, Plus } from 'lucide-react';
+import { Reminder, Task } from './types';
 
 export default function App() {
   const [reminders, setReminders] = useState<Reminder[]>([
-    { id: '1', title: "ডাক্তারের সাথে অ্যাপয়েন্টমেন্ট", subtitle: "Dr. Karim, Dec 21, 10:30 AM", icon: 'medical' },
-    { id: '2', title: "প্রজেক্ট প্রস্তাবনা জমা", subtitle: "Dec 23, 4:00 PM", icon: 'file' },
-    { id: '3', title: "মুদির বাজার", subtitle: "Rice, Fish <br>Dec 24, 6:00 PM", icon: 'cart' },
+    { id: '1', title: "ডাক্তারের সাথে অ্যাপয়েন্টমেন্ট", subtitle: "Dr. Karim", date: "2026-12-21", time: "10:30", icon: 'meeting' },
+    { id: '2', title: "প্রজেক্ট প্রস্তাবনা জমা", subtitle: "Project Alpha", date: "2026-12-23", time: "16:00", icon: 'task' },
+    { id: '3', title: "মুদির বাজার", subtitle: "Rice, Fish", date: "2026-12-24", time: "18:00", icon: 'call' },
   ]);
+  const [tasks, setTasks] = useState<Task[]>([
+    { id: '1', title: "অফিস মিটিংয়ের জন্য স্লাইড তৈরি করা", completed: false, category: 'মিটিং', dueDate: 'আজ, বিকাল ৪:০০ টা' },
+    { id: '2', title: "ডাক্তার অ্যাপয়েন্টমেন্টের বুকিং নিশ্চিত করা", completed: false, category: 'গুরুত্বপূর্ণ', dueDate: 'আজ, সকাল ১০:৩০ টা' },
+  ]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [reminderToEdit, setReminderToEdit] = useState<Reminder | null>(null);
+  const [activeTab, setActiveTab] = useState<'reminders' | 'tasks' | 'categories' | 'settings'>('reminders');
 
-  const addReminder = (text: string) => {
+  const addReminder = (reminder: { title: string; subtitle: string; date: string; time: string; icon: 'meeting' | 'task' | 'call' }) => {
     const newReminder: Reminder = {
       id: Date.now().toString(),
-      title: text,
-      subtitle: "নতুন কাজ",
-      icon: 'file',
+      ...reminder
     };
     setReminders([newReminder, ...reminders]);
   };
 
+  const updateReminder = (updatedReminder: Reminder) => {
+    setReminders(reminders.map(r => r.id === updatedReminder.id ? updatedReminder : r));
+    setReminderToEdit(null);
+  };
+
+  const toggleTask = (id: string) => {
+    setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+  };
+  
   const getIcon = (type: string) => {
     switch(type) {
-        case 'medical': return <Stethoscope className="w-5 h-5" />;
-        case 'cart': return <ShoppingCart className="w-5 h-5" />;
-        default: return <FileText className="w-5 h-5" />;
+        case 'meeting': return <CalendarDays className="w-5 h-5" />;
+        case 'task': return <ListChecks className="w-5 h-5" />;
+        default: return <Phone className="w-5 h-5" />;
     }
   }
 
   const getBgColor = (type: string) => {
     switch(type) {
-        case 'medical': return 'bg-red-100';
-        case 'cart': return 'bg-green-100';
-        default: return 'bg-amber-100';
+        case 'meeting': return 'bg-blue-100';
+        case 'task': return 'bg-amber-100';
+        default: return 'bg-blue-100';
     }
   }
 
   const getColor = (type: string) => {
     switch(type) {
-        case 'medical': return 'text-red-500';
-        case 'cart': return 'text-green-500';
-        default: return 'text-amber-500';
+        case 'meeting': return 'text-[#092A54]';
+        case 'task': return 'text-amber-500';
+        default: return 'text-[#1E88E5]';
     }
   }
 
@@ -59,31 +75,57 @@ export default function App() {
         <Header />
 
         <div className="flex-1 overflow-y-auto px-4 py-4 pb-24">
-          <QuickAdd onAdd={addReminder} />
+          {activeTab === 'reminders' && (
+            <>
+              <QuickAdd onAdd={(text) => addReminder({title: text, subtitle: 'নতুন কাজ', date: new Date().toISOString().split('T')[0], time: '09:00', icon: 'task'})} />
 
-          <div>
-            <h2 className="text-lg font-bold text-gray-800 mb-3 font-bengali">আসন্ন রিমাইন্ডারসমূহ</h2>
-            
-            {reminders.map(r => (
-              <ReminderCard 
-                key={r.id}
-                icon={getIcon(r.icon)}
-                iconBg={getBgColor(r.icon)}
-                iconColor={getColor(r.icon)}
-                title={r.title}
-                subtitle={r.subtitle}
-              />
-            ))}
+              <div>
+                <h2 className="text-lg font-bold text-gray-800 mb-3 font-bengali">আসন্ন রিমাইন্ডারসমূহ</h2>
+                
+                {reminders.map(r => (
+                  <ReminderCard 
+                    key={r.id}
+                    icon={getIcon(r.icon)}
+                    iconBg={getBgColor(r.icon)}
+                    iconColor={getColor(r.icon)}
+                    title={r.title}
+                    subtitle={`${r.subtitle} ${r.date ? `• ${new Date(r.date).toLocaleDateString('bn-BD')} • ${r.time}` : ''}`}
+                    onSubtitleClick={() => {
+                        setReminderToEdit(r);
+                        setIsModalOpen(true);
+                    }}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
+          {activeTab === 'tasks' && (
+             <div>
+                <h2 className="text-lg font-bold text-gray-800 mb-3 font-bengali">কাজসমূহ</h2>
+                <TaskList tasks={tasks} onToggle={toggleTask} />
+             </div>
+          )}
+        </div>
+
+        {activeTab === 'reminders' && (
+          <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-20">
+            <button onClick={() => { setReminderToEdit(null); setIsModalOpen(true); }} className="bg-[#092A54] hover:bg-[#0c386e] text-white font-semibold py-3 px-6 rounded-full shadow-lg flex items-center gap-2 text-sm whitespace-nowrap border-2 border-white font-bengali">
+              <Plus className="w-4 h-4" /> নতুন যুক্ত করুন
+            </button>
           </div>
-        </div>
+        )}
 
-        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-20">
-          <button onClick={() => addReminder('নতুন কাজ')} className="bg-[#092A54] hover:bg-[#0c386e] text-white font-semibold py-3 px-6 rounded-full shadow-lg flex items-center gap-2 text-sm whitespace-nowrap border-2 border-white font-bengali">
-            <Plus className="w-4 h-4" /> নতুন যুক্ত করুন
-          </button>
-        </div>
+        <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
 
-        <BottomNav />
+        {isModalOpen && (
+          <NewEventModal 
+            onClose={() => { setIsModalOpen(false); setReminderToEdit(null); }} 
+            onAdd={addReminder} 
+            reminderToEdit={reminderToEdit || undefined}
+            onUpdate={updateReminder}
+          />
+        )}
       </div>
     </div>
   );

@@ -7,9 +7,10 @@ export interface ReminderCardProps {
   iconColor: string;
   title: string;
   subtitle: string;
+  onSubtitleClick?: () => void;
 }
 
-export const ReminderCard: React.FC<ReminderCardProps> = ({ icon, iconBg, iconColor, title, subtitle }) => (
+export const ReminderCard: React.FC<ReminderCardProps> = ({ icon, iconBg, iconColor, title, subtitle, onSubtitleClick }) => (
   <div className="bg-white rounded-2xl p-4 shadow-sm mb-3">
     <div className="flex justify-between items-start mb-3">
       <div className="flex items-center gap-3">
@@ -18,7 +19,11 @@ export const ReminderCard: React.FC<ReminderCardProps> = ({ icon, iconBg, iconCo
         </div>
         <div>
           <h3 className="font-bold text-gray-900 text-sm font-bengali">{title}</h3>
-          <p className="text-xs text-gray-500 mt-0.5 font-bengali" dangerouslySetInnerHTML={{ __html: subtitle }} />
+          <p 
+            className="text-xs text-gray-500 mt-0.5 font-bengali cursor-pointer hover:text-blue-500 transition" 
+            onClick={onSubtitleClick}
+            dangerouslySetInnerHTML={{ __html: subtitle }} 
+          />
         </div>
       </div>
       <button className="text-gray-400 hover:text-gray-600"><MoreHorizontal /></button>

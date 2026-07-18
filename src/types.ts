@@ -2,5 +2,15 @@ export interface Reminder {
   id: string;
   title: string;
   subtitle: string;
-  icon: 'medical' | 'file' | 'cart';
+  date: string;
+  time: string;
+  icon: 'meeting' | 'task' | 'call';
+}
+
+export interface Task {
+  id: string;
+  title: string;
+  completed: boolean;
+  category: string;
+  dueDate: string;
 }
