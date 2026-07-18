@@ -1,0 +1,31 @@
+import React from 'react';
+import { MoreHorizontal } from 'lucide-react';
+
+interface ReminderCardProps {
+  icon: React.ReactNode;
+  iconBg: string;
+  iconColor: string;
+  title: string;
+  subtitle: string;
+}
+
+export const ReminderCard = ({ icon, iconBg, iconColor, title, subtitle }: ReminderCardProps) => (
+  <div className="bg-white rounded-2xl p-4 shadow-sm mb-3">
+    <div className="flex justify-between items-start mb-3">
+      <div className="flex items-center gap-3">
+        <div className={`w-10 h-10 rounded-full ${iconBg} flex items-center justify-center ${iconColor}`}>
+          {icon}
+        </div>
+        <div>
+          <h3 className="font-bold text-gray-900 text-sm font-bengali">{title}</h3>
+          <p className="text-xs text-gray-500 mt-0.5 font-bengali" dangerouslySetInnerHTML={{ __html: subtitle }} />
+        </div>
+      </div>
+      <button className="text-gray-400 hover:text-gray-600"><MoreHorizontal /></button>
+    </div>
+    <div className="flex gap-2">
+      <button className="flex-1 bg-blue-50 text-blue-600 rounded-xl py-1.5 text-xs font-medium hover:bg-blue-100 transition font-bengali">সম্পাদনা করুন</button>
+      <button className="flex-1 bg-red-50 text-red-500 rounded-xl py-1.5 text-xs font-medium hover:bg-red-100 transition font-bengali">বাতিল করুন</button>
+    </div>
+  </div>
+);
