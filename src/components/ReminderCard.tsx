@@ -1,7 +1,7 @@
 import React from 'react';
 import { MoreHorizontal } from 'lucide-react';
 
-interface ReminderCardProps {
+export interface ReminderCardProps {
   icon: React.ReactNode;
   iconBg: string;
   iconColor: string;
@@ -9,7 +9,7 @@ interface ReminderCardProps {
   subtitle: string;
 }
 
-export const ReminderCard = ({ icon, iconBg, iconColor, title, subtitle }: ReminderCardProps) => (
+export const ReminderCard: React.FC<ReminderCardProps> = ({ icon, iconBg, iconColor, title, subtitle }) => (
   <div className="bg-white rounded-2xl p-4 shadow-sm mb-3">
     <div className="flex justify-between items-start mb-3">
       <div className="flex items-center gap-3">
